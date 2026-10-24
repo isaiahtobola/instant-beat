@@ -1,0 +1,1567 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="dark" />
+<link rel="icon" href="data:," />
+<title>Instant Beat Diagram — BW Young Bo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;0,6..72,800;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    color-scheme: dark;
+    --bg:#150d20; --ink:#f0e7d3; --muted:#b3a1c4; --line:#3a2a54;
+    --panel:#1f1433; --panel2:#291b44; --accent:#f0b73f; --accent-soft:#ffd166;
+    --cell:#2e2149; --cell-on:#f0b73f; --on-accent:#171106; --cell-top:#4a3870; --rack:#180f2a; --cell-alt:#37285a;
+    --shadow:0 18px 50px rgba(0,0,0,.45);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Newsreader", Georgia, "Times New Roman", serif;
+    line-height:1.55; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1060px; margin:0 auto; padding:0 20px 80px}
+
+  header{padding:64px 0 8px}
+  .kicker{
+    font-family:"IBM Plex Mono", monospace; font-size:12px; letter-spacing:.22em;
+    text-transform:uppercase; color:var(--accent); margin:0 0 18px;
+  }
+  h1{
+    font-size:clamp(40px, 7.5vw, 76px); line-height:.98; font-weight:800;
+    margin:0 0 20px; letter-spacing:-.01em;
+  }
+  h1 em{font-style:italic; font-weight:400; color:var(--accent)}
+  .lede{font-size:clamp(18px, 2.4vw, 23px); max-width:640px; margin:0 0 14px}
+  .lede strong{font-weight:600}
+  .creditline{
+    font-family:"IBM Plex Mono", monospace; font-size:13px; color:var(--muted);
+    border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+    padding:10px 0; margin:26px 0 0; display:flex; flex-wrap:wrap; gap:6px 26px;
+  }
+  .creditline b{color:var(--ink); font-weight:600}
+
+  section{margin-top:72px}
+  .sec-head{display:flex; align-items:center; gap:16px; margin-bottom:8px; flex-wrap:wrap}
+  .sec-num{
+    font-family:"IBM Plex Mono", monospace; font-size:13px; color:var(--accent);
+    border:1px solid var(--accent); border-radius:999px; padding:2px 10px; white-space:nowrap;
+  }
+  h2{font-size:clamp(27px, 4.4vw, 40px); font-weight:800; margin:0; line-height:1.05}
+  .sec-sub{color:var(--muted); font-size:17px; max-width:660px; margin:8px 0 26px}
+  .panel{
+    background:var(--panel); border:1px solid var(--line); border-radius:14px;
+    box-shadow:var(--shadow); padding:26px;
+  }
+  svg text{font-family:"IBM Plex Mono", monospace}
+  .fig-cap{
+    font-family:"IBM Plex Mono", monospace; font-size:12.5px; color:var(--muted);
+    margin-top:14px; letter-spacing:.02em;
+  }
+  .fig-cap b{color:var(--accent); font-weight:600}
+
+  /* FL-style how-to strip: three numbered moves, readable at a glance */
+  .howto{display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:16px}
+  .howto div{
+    border:1px solid var(--line); border-radius:10px; background:var(--panel2);
+    padding:10px 12px; font-family:"IBM Plex Mono", monospace; font-size:12.5px; color:var(--muted);
+  }
+  .howto b{display:block; color:var(--accent); font-size:13px; margin-bottom:2px; letter-spacing:.04em}
+  .howto strong{color:var(--ink); font-weight:600}
+
+  .transport{
+    display:flex; flex-wrap:wrap; gap:14px; align-items:center; margin-bottom:22px;
+    background:var(--rack); border:1px solid var(--line); border-radius:10px; padding:12px 14px;
+  }
+  #bpmOut{font-size:17px; color:var(--accent); min-width:82px}
+  .btn{
+    font-family:"IBM Plex Mono", monospace; font-size:14px; font-weight:600;
+    background:var(--accent); color:var(--on-accent); border:none; border-radius:10px;
+    padding:12px 22px; cursor:pointer; letter-spacing:.04em;
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn.ghost{background:transparent; color:var(--ink); border:1px solid var(--line)}
+  .btn.ghost:hover{border-color:var(--accent); color:var(--accent)}
+  .ctl{display:flex; align-items:center; gap:10px; font-family:"IBM Plex Mono", monospace; font-size:13px; color:var(--muted)}
+  .ctl output{color:var(--ink); font-weight:600; min-width:70px}
+  input[type=range]{accent-color:var(--accent); width:150px}
+  .seg{display:flex; border:1px solid var(--line); border-radius:10px; overflow:hidden}
+  .seg button{
+    font-family:"IBM Plex Mono", monospace; font-size:13px; font-weight:600;
+    background:transparent; color:var(--muted); border:none; padding:10px 11px; cursor:pointer;
+  }
+  .seg button + button{border-left:1px solid var(--line)}
+  .seg button.active{background:var(--accent); color:var(--on-accent)}
+
+  /* FL channel rack: channel buttons on the left, 16 step buttons in
+     four clear groups of 4 — groups alternate shade, like FL Studio. */
+  .rackhead{
+    display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;
+    font-family:"IBM Plex Mono", monospace; font-size:11px; letter-spacing:.18em;
+    color:var(--muted); text-transform:uppercase; margin-bottom:10px;
+  }
+  .rackhead b{color:var(--accent); font-weight:600}
+  .grouphead{display:grid; grid-template-columns:92px repeat(4, 1fr); gap:5px; margin-bottom:4px}
+  .grouphead span{
+    font-family:"IBM Plex Mono", monospace; font-size:10.5px; font-weight:600;
+    letter-spacing:.14em; color:var(--accent); text-align:center;
+  }
+  .grouphead span:first-child{text-align:right; padding-right:10px; color:var(--muted); letter-spacing:.08em}
+  .seq{display:grid; grid-template-columns:92px repeat(16, 1fr); gap:5px; align-items:center}
+  .row-label{
+    font-family:"IBM Plex Mono", monospace; font-size:12px; font-weight:600;
+    letter-spacing:.08em; color:var(--ink); text-align:left;
+    background:var(--panel2); border:1px solid var(--line); border-radius:8px;
+    padding:9px 10px; display:flex; align-items:center; gap:7px;
+  }
+  .row-label::before{content:""; width:8px; height:8px; border-radius:50%; background:var(--accent); flex:none}
+  .row-label.hot{color:var(--accent); border-color:var(--accent)}
+  .step{
+    aspect-ratio:4/5; border-radius:5px 5px 7px 7px; background:var(--cell);
+    border:1px solid var(--line); border-top:3px solid var(--cell-top); cursor:pointer; padding:0; min-width:0;
+  }
+  .step.grp1{background:var(--cell-alt)}
+  .step.beat{margin-left:8px}
+  .step.on{background:var(--cell-on); border-color:var(--cell-on); border-top-color:var(--accent-soft)}
+  .step.now{outline:2px solid var(--ink); outline-offset:1px}
+  .step.melody-step{display:flex; align-items:center; justify-content:center}
+  .step .note-name{font-family:"IBM Plex Mono",monospace; font-size:9px; font-weight:700; letter-spacing:.01em; pointer-events:none; color:var(--on-accent); line-height:1; text-align:center}
+  .step:not(.on) .note-name{display:none}
+  .step.picker-open{outline:2px solid var(--accent-soft); outline-offset:2px}
+  .note-picker{position:fixed; z-index:60; width:188px; background:var(--panel2); border:1px solid var(--accent); border-radius:12px; box-shadow:var(--shadow); padding:10px; font-family:"IBM Plex Mono",monospace}
+  .note-picker-head{font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); font-weight:700}
+  .note-picker-cur{font-size:22px; font-weight:700; color:var(--ink); line-height:1.15; margin:2px 0 1px}
+  .note-picker-sub{font-size:10.5px; color:var(--muted); margin-bottom:8px; line-height:1.4}
+  .note-picker-list{max-height:212px; overflow-y:auto; display:grid; grid-template-columns:repeat(3, 1fr); gap:4px; padding-right:2px}
+  .note-opt{font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:600; background:var(--rack); color:var(--ink); border:1px solid var(--line); border-radius:6px; padding:6px 2px; cursor:pointer; text-align:center}
+  .note-opt:hover{border-color:var(--accent); color:var(--accent)}
+  .note-opt.active{background:var(--accent); color:var(--on-accent); border-color:var(--accent)}
+  .note-opt.active:hover{color:var(--on-accent)}
+  .note-picker-foot{font-size:10px; color:var(--muted); margin-top:8px; line-height:1.45}
+  .stepnums{display:grid; grid-template-columns:92px repeat(16, 1fr); gap:5px; margin-bottom:6px}
+  .stepnums span{
+    font-family:"IBM Plex Mono", monospace; font-size:10px; color:var(--muted);
+    text-align:center;
+  }
+  .stepnums span.beat{color:var(--accent); font-weight:600; margin-left:8px}
+  .stepnums span:first-child{text-align:right; padding-right:8px}
+
+  .pads{display:grid; grid-template-columns:repeat(4, 1fr); gap:14px; margin-top:24px}
+  @media (max-width:960px){ .pads{grid-template-columns:repeat(2, 1fr)} }
+  /* Melody piano roll — separate from the hi-hat blueprint */
+  .melody-roll{margin-top:26px; background:var(--rack); border:1px solid var(--accent); border-radius:12px; padding:18px 16px 16px}
+  .melody-roll-head{display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:baseline; margin-bottom:6px}
+  .melody-roll-head b{font-family:"IBM Plex Mono",monospace; letter-spacing:.12em; font-size:13px; color:var(--accent); text-transform:uppercase}
+  .melody-roll-head span{font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--muted)}
+  .melody-roll p{margin:0 0 14px; font-size:15.5px; color:var(--muted)}
+  .melody-roll p b{color:var(--ink)}
+  .mrow{display:flex; gap:4px; margin-bottom:6px}
+  .mrow-label{font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.1em; color:var(--muted); width:86px; flex:none; display:flex; align-items:center; text-transform:uppercase; line-height:1.3}
+  .mkey{flex:1; min-width:0; border-radius:6px; border:1px solid var(--line); padding:9px 2px 7px; cursor:pointer; text-align:center; font-family:"IBM Plex Mono",monospace; user-select:none}
+  .mkey .kchar{display:block; font-size:15px; font-weight:700; line-height:1}
+  .mkey .knote{display:block; font-size:9.5px; margin-top:4px; opacity:.75; letter-spacing:.04em}
+  .mkey.white{background:#f8f3ea; color:#221638}
+  .mkey.black{background:#22122f; color:var(--ink)}
+  .mkey.lit{background:var(--accent)!important; color:var(--on-accent)!important; border-color:var(--accent)}
+  .mkey:active{transform:translateY(1px)}
+  @media (max-width:720px){ .mrow{flex-wrap:wrap} .mrow-label{width:100%; margin-bottom:2px} .mkey{flex:1 1 15%} .mkey .kchar{font-size:13px} }
+  .pad{
+    border:1px solid var(--line); border-radius:12px; background:var(--panel2);
+    padding:18px 14px 14px; text-align:center; cursor:pointer; user-select:none;
+    -webkit-user-select:none; touch-action:manipulation;
+  }
+  .pad:hover{border-color:var(--accent)}
+  .pad.flash{border-color:var(--accent); background:var(--accent)}
+  .pad.flash .pad-name, .pad.flash .pad-key, .pad.flash .pad-sub{color:var(--on-accent)}
+  .pad-name{font-family:"IBM Plex Mono", monospace; font-weight:600; font-size:16px; letter-spacing:.06em}
+  .pad-sub{font-size:14.5px; color:var(--muted); font-style:italic; margin-top:2px; min-height:21px}
+  .pad-key{
+    display:inline-block; margin-top:10px; font-family:"IBM Plex Mono", monospace;
+    font-size:11px; border:1px solid var(--line); border-bottom-width:2px; border-radius:6px;
+    padding:2px 8px; color:var(--muted);
+  }
+  .eye{width:74px; height:44px; margin:0 auto 6px; display:block}
+  .piano{position:relative; height:66px; max-width:250px; margin:0 auto 8px}
+  .wkeys{display:flex; height:100%}
+  .wkey{flex:1; background:#f8f3ea; border:1px solid rgba(32,16,48,.5); border-top:none; border-radius:0 0 5px 5px}
+  .wkey.lit{background:var(--accent-soft)}
+  .bkey{position:absolute; top:0; width:9%; height:58%; transform:translateX(-50%); background:#22122f; border-radius:0 0 4px 4px; z-index:2}
+  .bkey.lit{background:var(--accent-soft)}
+  .trig-seg{display:inline-flex; margin-top:12px; border:1px solid var(--line); border-radius:8px; overflow:hidden}
+  .trig-seg button{
+    font-family:"IBM Plex Mono", monospace; font-size:11px; font-weight:600;
+    background:transparent; color:var(--muted); border:none; padding:5px 10px; cursor:pointer;
+  }
+  .trig-seg button + button{border-left:1px solid var(--line)}
+  .trig-seg button.active{background:var(--accent); color:var(--on-accent)}
+  .status{
+    font-family:"IBM Plex Mono", monospace; font-size:12.5px; color:var(--muted);
+    margin-top:18px; min-height:20px;
+  }
+  .status b{color:var(--accent); font-weight:600}
+
+  /* Hi-Hat Pattern Randomizer bar — distinct from the step seg, sits right under transport */
+  .pattern-bar{
+    display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between;
+    background:#22153d; border:1px dashed var(--accent); border-radius:10px; padding:12px 14px; margin-bottom:18px;
+  }
+  .pattern-bar-left{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+  .pattern-bar-label{font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); line-height:1.3}
+  .pattern-bar-label b{display:block; color:var(--ink); font-size:12px; letter-spacing:.05em}
+  #hatPatternName{font-family:"IBM Plex Mono",monospace; font-size:13px; font-weight:700; color:var(--accent); background:var(--rack); border:1px solid var(--line); padding:8px 12px; border-radius:8px; min-width:210px; text-align:center}
+  #hatPatternName small{display:block; font-weight:400; color:var(--muted); font-size:11px; margin-top:2px; letter-spacing:.02em}
+  .randomizer-btn{
+    font-family:"IBM Plex Mono",monospace; font-size:14px; font-weight:700; letter-spacing:.03em;
+    background:var(--ink); color:#1a0f2e; border:2px solid var(--accent); border-radius:10px;
+    padding:13px 18px; cursor:pointer; white-space:nowrap; box-shadow:4px 4px 0 var(--accent);
+  }
+  .randomizer-btn:active{transform:translate(2px,2px); box-shadow:2px 2px 0 var(--accent)}
+  .pattern-dots{display:flex; gap:5px; flex-wrap:wrap}
+  .pattern-dots i{width:22px; height:6px; border-radius:999px; background:var(--cell); border:1px solid var(--line); display:block}
+  .pattern-dots i.on{background:var(--accent); border-color:var(--accent)}
+
+  /* Change Sample buttons — square, same height as pad label area, under each pad */
+  .change-sample{
+    margin-top:14px; width:100%; display:flex; align-items:stretch; gap:0; border:1px solid var(--line); border-radius:9px; overflow:hidden; background:var(--rack);
+  }
+  .change-sample button{
+    flex:1; font-family:"IBM Plex Mono",monospace; font-size:12.5px; font-weight:700; letter-spacing:.04em;
+    background:var(--accent); color:var(--on-accent); border:none; padding:11px 8px; cursor:pointer; text-transform:uppercase;
+  }
+  .change-sample button:active{opacity:.85}
+  .sample-name{
+    display:flex; align-items:center; padding:0 10px; font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--accent);
+    white-space:nowrap; border-left:1px solid var(--line); background:#1e1233; min-width:0;
+  }
+  .sample-name span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+
+  .channels{display:grid; grid-template-columns:repeat(2, 1fr); gap:16px}
+  .chan{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:22px}
+  .chan .tag{
+    font-family:"IBM Plex Mono", monospace; font-size:11px; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--accent);
+  }
+  .chan h3{font-size:23px; margin:8px 0 8px; font-weight:800; line-height:1.1}
+  .chan p{margin:0; font-size:16px}
+  .chan p + p{margin-top:8px}
+  .chan .why{color:var(--muted); font-size:15px}
+
+  .note{
+    border:1px dashed var(--accent-soft); border-radius:14px; padding:26px 28px;
+    background:var(--panel);
+  }
+  .note .tag{font-family:"IBM Plex Mono", monospace; font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--accent)}
+  .note blockquote{
+    margin:14px 0 0; font-size:clamp(18px, 2.6vw, 22px); font-style:italic; line-height:1.6;
+  }
+  .note blockquote p{margin:0 0 10px}
+  .note blockquote p:last-child{margin-bottom:0}
+
+  footer{margin-top:80px; border-top:1px solid var(--line); padding-top:26px}
+  .coined{font-size:clamp(20px, 3vw, 26px); font-weight:600; max-width:640px; margin:0 0 10px}
+  .coined em{color:var(--accent)}
+  footer p.small{font-family:"IBM Plex Mono", monospace; font-size:12.5px; color:var(--muted); margin:0}
+
+  /* ---- Desktop motion layer: signals flow, the eye blinks, keys play.
+         Gated to wide screens with a fine pointer; phones keep the calm version. ---- */
+  @media (min-width:721px) and (hover:hover) and (pointer:fine) and (prefers-reduced-motion: no-preference){
+    .wires path{stroke-dasharray:7 9; animation:march 1.1s linear infinite}
+    @keyframes march{to{stroke-dashoffset:-16}}
+    .beatbox{animation:beatglow 2.6s ease-in-out infinite}
+    @keyframes beatglow{0%,100%{filter:drop-shadow(0 0 0 rgba(0,0,0,0))}50%{filter:drop-shadow(0 0 10px var(--accent-soft))}}
+    #lid{animation:idleblink 4.8s infinite}
+    @keyframes idleblink{0%,92%,100%{opacity:0}95%,97%{opacity:1}}
+    #iris{animation:idlelook 9s ease-in-out infinite}
+    @keyframes idlelook{0%,100%{transform:translateX(0)}30%{transform:translateX(2.5px)}60%{transform:translateX(-2.5px)}}
+    .pad{transition:border-color .18s ease, background .18s ease}
+    .pad.flash{animation:padpop .3s ease}
+    @keyframes padpop{35%{transform:scale(1.035)}}
+    .pad.flash .eye, .pad.flash .piano{animation:padicon .3s ease}
+    @keyframes padicon{40%{transform:translateY(2px)}}
+    .step{transition:background .12s ease, box-shadow .12s ease}
+    .step.now{box-shadow:0 0 0 2px var(--ink), 0 0 14px var(--accent-soft)}
+    .stepnums span.now{color:var(--accent); font-weight:600}
+    .f3on{animation:f3glow 3.6s ease-in-out infinite}
+    @keyframes f3glow{0%,100%{opacity:1}50%{opacity:.5}}
+    #playBtn.playing{animation:btnpulse 1.6s ease-in-out infinite}
+    @keyframes btnpulse{0%,100%{box-shadow:0 0 0 0 rgba(0,0,0,0)}50%{box-shadow:0 0 0 6px var(--panel2)}}
+    /* ---- PC glow pass: the gold actually lights up on a big screen ---- */
+    h1 em{animation:titleglow 3.4s ease-in-out infinite}
+    @keyframes titleglow{0%,100%{text-shadow:0 0 0 rgba(0,0,0,0)}50%{text-shadow:0 0 22px rgba(240,183,63,.55)}}
+    .step.on{box-shadow:0 0 9px rgba(240,183,63,.55), inset 0 0 6px rgba(255,209,102,.5)}
+    .step.now.on{box-shadow:0 0 0 2px var(--ink), 0 0 20px var(--accent-soft), 0 0 34px rgba(240,183,63,.45)}
+    .step{transition:background .12s ease, box-shadow .18s ease}
+    .step:hover{box-shadow:0 0 10px rgba(240,183,63,.35)}
+    .pad{transition:border-color .18s ease, background .18s ease, box-shadow .25s ease}
+    .pad:hover{box-shadow:0 0 18px rgba(240,183,63,.28)}
+    .pad.flash{box-shadow:0 0 26px rgba(240,183,63,.65)}
+    .row-label.hot{box-shadow:0 0 14px rgba(240,183,63,.55)}
+    .wkey.lit, .bkey.lit{box-shadow:0 0 16px var(--accent-soft), 0 0 30px rgba(240,183,63,.4)}
+    .beatbox{animation:beatglow 2.6s ease-in-out infinite}
+    @keyframes beatglow{0%,100%{filter:drop-shadow(0 0 2px rgba(240,183,63,.25))}50%{filter:drop-shadow(0 0 16px var(--accent-soft)) drop-shadow(0 0 30px rgba(240,183,63,.35))}}
+    .seg button.active, .trig-seg button.active{box-shadow:0 0 12px rgba(240,183,63,.5)}
+    .btn{transition:box-shadow .2s ease, transform .1s ease}
+    .btn:hover{box-shadow:0 0 16px rgba(240,183,63,.45)}
+    .note{animation:noteglow 4.2s ease-in-out infinite}
+    @keyframes noteglow{0%,100%{box-shadow:0 0 0 rgba(0,0,0,0)}50%{box-shadow:0 0 22px rgba(255,209,102,.22)}}
+    .sec-num{box-shadow:0 0 10px rgba(240,183,63,.25)}
+  }
+
+  @media (max-width:720px){
+    .channels{grid-template-columns:1fr}
+    .pads{grid-template-columns:1fr}
+    .howto{grid-template-columns:1fr}
+    .seq{grid-template-columns:54px repeat(16, 1fr); gap:3px}
+    .stepnums{grid-template-columns:54px repeat(16, 1fr); gap:3px}
+    .grouphead{grid-template-columns:54px repeat(4, 1fr); gap:3px}
+    .grouphead span{font-size:8.5px}
+    .stepnums span{font-size:8px}
+    .step.beat{margin-left:4px}
+    .stepnums span.beat{margin-left:4px}
+    .row-label{font-size:9.5px; padding:7px 6px; gap:5px}
+    .transport{padding:10px}
+    .ctl{flex-wrap:wrap}
+    .seg{flex-wrap:wrap; max-width:100%}
+    .seg button{padding:9px 7px; font-size:12px}
+    input[type=range]{width:120px}
+    .panel{padding:18px 14px}
+    header{padding-top:44px}
+  }
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="kicker">A diagram · An invention · A demo you can play</p>
+    <h1>Make a beat<br /><em>instant,</em> nearly.</h1>
+    <p class="lede">No piano roll for the drums. No clicking drum notes in one at a time. Your <strong>body is the drum machine</strong> — eyes, one finger, one foot — and a full beat assembles itself in a single pass, live. The tune gets its own roll, further down.</p>
+    <div class="creditline">
+      <span>Idea coined by <b>BW Young Bo</b></span>
+      <span>“Say clap” mic trigger by <b>Terrence</b></span>
+      <span>Open to anyone smart enough to build it</span>
+      <span>Credit is the only ask</span>
+    </div>
+  </header>
+
+  <!-- ============ FIG 1 : SIGNAL FLOW ============ -->
+  <section>
+    <div class="sec-head"><span class="sec-num">FIG. 1</span><h2>Three body parts in, one beat out</h2></div>
+    <p class="sec-sub">Every drum part gets assigned to a body part that already knows rhythm. Nothing is programmed note-by-note — each channel is <em>performed</em> straight into the loop.</p>
+    <div class="panel">
+      <svg viewBox="0 0 920 478" width="100%" role="img" aria-label="Signal flow diagram, read left to right in three columns. Input: eyes or voice, finger on a piano key, foot on a kick pedal. Each input plays one track: blink or say clap for the clap track, one press sets the hi-hat blueprint, stomp for the kick and bass track. All three tracks merge into one instant beat loop.">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"></path>
+          </marker>
+        </defs>
+        <!-- column headers: read the diagram left to right -->
+        <g font-size="12" font-weight="600" letter-spacing="2" fill="var(--muted)">
+          <text x="20" y="22">1 · YOUR BODY</text>
+          <text x="404" y="22">2 · THE TRACK IT PLAYS</text>
+          <text x="748" y="22">3 · RESULT</text>
+        </g>
+        <!-- column 1: inputs -->
+        <g>
+          <rect x="20" y="40" width="240" height="104" rx="10" fill="var(--panel2)" stroke="var(--line)"></rect>
+          <circle cx="46" cy="66" r="11" fill="var(--accent)"></circle>
+          <text x="46" y="71" font-size="12" font-weight="600" fill="var(--on-accent)" text-anchor="middle">1</text>
+          <text x="66" y="72" font-size="16" font-weight="600" fill="var(--ink)">EYES · OR VOICE</text>
+          <text x="42" y="100" font-size="13" fill="var(--muted)">webcam sees a blink</text>
+          <text x="42" y="122" font-size="13" fill="var(--muted)">or the mic hears: “clap”</text>
+
+          <rect x="20" y="182" width="240" height="104" rx="10" fill="var(--panel2)" stroke="var(--line)"></rect>
+          <circle cx="46" cy="208" r="11" fill="var(--accent)"></circle>
+          <text x="46" y="213" font-size="12" font-weight="600" fill="var(--on-accent)" text-anchor="middle">2</text>
+          <text x="66" y="214" font-size="16" font-weight="600" fill="var(--ink)">FINGER · PIANO KEY</text>
+          <text x="42" y="242" font-size="13" fill="var(--muted)">ONE press — that's all</text>
+          <text x="42" y="264" font-size="13" fill="var(--muted)">step preset: 1 · 2 · 4 · 8 · 16</text>
+
+          <rect x="20" y="324" width="240" height="104" rx="10" fill="var(--panel2)" stroke="var(--line)"></rect>
+          <circle cx="46" cy="350" r="11" fill="var(--accent)"></circle>
+          <text x="46" y="355" font-size="12" font-weight="600" fill="var(--on-accent)" text-anchor="middle">3</text>
+          <text x="66" y="356" font-size="16" font-weight="600" fill="var(--ink)">FOOT · KICK PEDAL</text>
+          <text x="42" y="384" font-size="13" fill="var(--muted)">electric drum kick pedal</text>
+          <text x="42" y="406" font-size="13" fill="var(--muted)">every stomp = one kick hit</text>
+        </g>
+        <!-- wires: input to track, straight and level -->
+        <g class="wires" stroke="var(--accent)" stroke-width="2" fill="none">
+          <path d="M260,92 L396,92" marker-end="url(#arr)"></path>
+          <path d="M260,234 L396,234" marker-end="url(#arr)"></path>
+          <path d="M260,376 L396,376" marker-end="url(#arr)"></path>
+        </g>
+        <g font-size="12" fill="var(--accent)" font-weight="600" text-anchor="middle">
+          <text x="328" y="80">BLINK / “CLAP”</text>
+          <text x="328" y="222">PRESS ×1</text>
+          <text x="328" y="364">STOMP</text>
+        </g>
+        <!-- column 2: tracks -->
+        <g>
+          <rect x="404" y="40" width="252" height="104" rx="10" fill="none" stroke="var(--accent)" stroke-width="1.5"></rect>
+          <text x="426" y="72" font-size="16" font-weight="600" fill="var(--accent)">CLAP TRACK</text>
+          <text x="426" y="100" font-size="13" fill="var(--muted)">the backbeat — beats 2 &amp; 4</text>
+          <text x="426" y="122" font-size="13" fill="var(--muted)">sparse, sharp, hands-free</text>
+
+          <rect x="404" y="182" width="252" height="104" rx="10" fill="none" stroke="var(--accent)" stroke-width="1.5"></rect>
+          <text x="426" y="214" font-size="16" font-weight="600" fill="var(--accent)">HI-HAT TRACK</text>
+          <text x="426" y="242" font-size="13" fill="var(--muted)">one press sets the blueprint</text>
+          <text x="426" y="264" font-size="13" fill="var(--muted)">the roll, written to the grid</text>
+
+          <rect x="404" y="324" width="252" height="104" rx="10" fill="none" stroke="var(--accent)" stroke-width="1.5"></rect>
+          <text x="426" y="356" font-size="16" font-weight="600" fill="var(--accent)">KICK / BASS TRACK</text>
+          <text x="426" y="384" font-size="13" fill="var(--muted)">the foundation of the beat</text>
+          <text x="426" y="406" font-size="13" fill="var(--muted)">played like a drummer's foot</text>
+        </g>
+        <!-- wires: tracks merge into the beat -->
+        <g class="wires" stroke="var(--accent)" stroke-width="2" fill="none">
+          <path d="M656,92 C 706,92 706,196 740,208" marker-end="url(#arr)"></path>
+          <path d="M656,234 L740,234" marker-end="url(#arr)"></path>
+          <path d="M656,376 C 706,376 706,272 740,260" marker-end="url(#arr)"></path>
+        </g>
+        <rect class="beatbox" x="748" y="164" width="152" height="140" rx="12" fill="var(--accent)"></rect>
+        <text x="824" y="222" font-size="17" font-weight="600" fill="var(--on-accent)" text-anchor="middle">INSTANT</text>
+        <text x="824" y="246" font-size="17" font-weight="600" fill="var(--on-accent)" text-anchor="middle">BEAT</text>
+        <text x="824" y="272" font-size="11.5" fill="var(--on-accent)" text-anchor="middle">one pass · looping</text>
+        <text x="824" y="290" font-size="11.5" fill="var(--on-accent)" text-anchor="middle">ready to rap over</text>
+        <text x="460" y="466" font-size="12.5" fill="var(--muted)" text-anchor="middle">Read it left to right: <tspan fill="var(--accent)" font-weight="600">body → track → beat.</tspan> Three channels, played at the same time.</text>
+      </svg>
+      <p class="fig-cap"><b>FIG. 1</b> — Three performed channels merge into one loop. The machine only quantizes; the human does all the music. The clap's second trigger — say “clap” into a mic — was Terrence's idea.</p>
+    </div>
+  </section>
+
+  <!-- ============ FIG 2 : THE DEMO ============ -->
+  <section>
+    <div class="sec-head"><span class="sec-num">FIG. 2</span><h2>Try it — this page is the instrument</h2></div>
+    <p class="sec-sub">A working miniature of the idea, laid out like FL Studio's channel rack: four channels down the left, sixteen steps across, grouped in fours. On a real rig the blink comes from your webcam; here the pads below the grid stand in for your body. Three moves, in order:</p>
+    <div class="panel">
+      <div class="howto">
+        <div><b>STEP 1 · PLAY</b>Hit <strong>Play</strong> — the loop runs, 16 steps, 4 beats.</div>
+        <div><b>STEP 2 · SET THE HATS</b>Pick a hat step (1 · 2 · 4 · 8 · 16), then press the piano <strong>once</strong>. One press writes the whole roll — the blueprint.</div>
+        <div><b>STEP 3 · PERFORM</b>Blink for claps, stomp for kicks — pads or keys <strong>B / F / Space</strong>. Hits snap into the grid.</div>
+      </div>
+      <div class="transport">
+        <button class="btn" id="playBtn" type="button">▶ Play</button>
+        <button class="btn ghost" id="demoBtn" type="button">▶ Watch it demonstrated — slowly</button>
+        <div class="ctl">
+          <label for="bpm">Tempo</label>
+          <input type="range" id="bpm" min="12" max="160" value="120" />
+          <output id="bpmOut">120 BPM</output>
+        </div>
+        <div class="ctl">
+          <span>Hat step · set first</span>
+          <div class="seg" id="divSeg" role="group" aria-label="Hi-hat step preset — how many steps between hat hits">
+            <button type="button" data-step="1">1-step</button>
+            <button type="button" data-step="2" class="active">2-step</button>
+            <button type="button" data-step="4">4-step</button>
+            <button type="button" data-step="8">8-step</button>
+            <button type="button" data-step="16">16-step</button>
+          </div>
+        </div>
+        <button class="btn ghost" id="clearBtn" type="button">Clear grid</button>
+      </div>
+
+      <div class="pattern-bar" aria-label="Hi-hat patterns — toggle through in order">
+        <div class="pattern-bar-left">
+          <div class="pattern-bar-label">Toggle through · wraps back to the start<b>HI-HAT PATTERNS · 14</b></div>
+          <div id="hatPatternName">DOUBLE-TIME WALL<small>1-step wall · full tisk, no air · 16 hats in the bar</small></div>
+          <div class="pattern-dots" id="patternDots" aria-hidden="true"></div>
+        </div>
+        <button class="randomizer-btn" id="hatRandomBtn" type="button">Next Hi-Hat Pattern ▸</button>
+      </div>
+
+      <div class="rackhead"><span><b>Channel rack</b> · 16 steps</span><span>drums: click to toggle · melody: click a step to change its key, double-click to remove it</span></div>
+      <div class="grouphead" aria-hidden="true"><span>CHANNEL</span><span>BEAT 1</span><span>BEAT 2</span><span>BEAT 3</span><span>BEAT 4</span></div>
+      <div class="stepnums" id="stepNums" aria-hidden="true"></div>
+      <div class="seq" id="seq" role="group" aria-label="Beat grid, 16 steps in four groups of four, like the FL Studio channel rack. Activate a cell to toggle that drum hit."></div>
+      <p class="fig-cap" style="margin:16px 0 0">↑ The grid is the beat. The pads below are <b>your body</b> — play them while it loops and your hits land in the grid.</p>
+
+      <div class="pads">
+        <div class="pad" id="padBlink" role="button" tabindex="0" aria-label="Clap pad — blink, or say clap into the mic, to trigger a clap">
+          <svg class="eye" id="clapEyeIcon" viewBox="0 0 74 44" aria-hidden="true">
+            <path d="M4,22 C18,4 56,4 70,22 C56,40 18,40 4,22 Z" fill="none" stroke="var(--accent)" stroke-width="2.5"></path>
+            <circle id="iris" cx="37" cy="22" r="9" fill="var(--accent)"></circle>
+            <path id="lid" d="M4,22 C18,4 56,4 70,22" fill="var(--panel2)" stroke="var(--accent)" stroke-width="2.5" opacity="0"></path>
+          </svg>
+          <svg class="eye" id="clapMicIcon" viewBox="0 0 74 44" aria-hidden="true" style="display:none">
+            <rect x="30" y="3" width="14" height="24" rx="7" fill="none" stroke="var(--accent)" stroke-width="2.5"></rect>
+            <path d="M20,19 C20,33 54,33 54,19" fill="none" stroke="var(--accent)" stroke-width="2.5"></path>
+            <path d="M37,33 L37,40 M28,40 L46,40" stroke="var(--accent)" stroke-width="2.5" fill="none"></path>
+          </svg>
+          <div class="pad-name" id="clapPadName">BLINK</div>
+          <div class="pad-sub" id="clapPadSub">eyes → clap</div>
+          <span class="pad-key">press B</span>
+          <div>
+            <div class="trig-seg" role="group" aria-label="Clap trigger choice">
+              <button type="button" id="trigBlink" class="active">Blink</button>
+              <button type="button" id="trigMic">Say “clap”</button>
+            </div>
+          </div>
+          <div class="change-sample"><button type="button" class="change-btn" data-row="clap">Change Sample</button><div class="sample-name"><span id="sampleName-clap">Crisp Studio Clap</span></div></div>
+        </div>
+        <div class="pad" id="padPiano" role="button" tabindex="0" aria-label="Piano pad — one press sets the hi-hat blueprint at the preset step">
+          <div class="piano" id="piano" aria-hidden="true">
+            <div class="wkeys">
+              <div class="wkey" data-freq="261.63"></div>
+              <div class="wkey" data-freq="293.66"></div>
+              <div class="wkey" data-freq="329.63"></div>
+              <div class="wkey" data-freq="349.23"></div>
+              <div class="wkey" data-freq="392.00"></div>
+              <div class="wkey" data-freq="440.00"></div>
+              <div class="wkey" data-freq="493.88"></div>
+              <div class="wkey" data-freq="523.25"></div>
+            </div>
+            <div class="bkey" style="left:12.5%" data-freq="277.18"></div>
+            <div class="bkey" style="left:25%" data-freq="311.13"></div>
+            <div class="bkey" style="left:50%" data-freq="369.99"></div>
+            <div class="bkey" style="left:62.5%" data-freq="415.30"></div>
+            <div class="bkey" style="left:75%" data-freq="466.16"></div>
+          </div>
+          <div class="pad-name">FINGER · PIANO</div>
+          <div class="pad-sub" id="pianoState">one press sets the blueprint · preset: every 2 steps</div>
+          <span class="pad-key">press once · or press F</span>
+          <div class="change-sample"><button type="button" class="change-btn" data-row="hat">Change Sample</button><div class="sample-name"><span id="sampleName-hat">Crisp Closed Hat</span></div></div>
+        </div>
+        <div class="pad" id="padKick" role="button" tabindex="0" aria-label="Kick pedal pad — triggers a kick drum">
+          <svg class="eye" viewBox="0 0 74 44" aria-hidden="true">
+            <circle cx="37" cy="22" r="15" fill="none" stroke="var(--accent)" stroke-width="2.5"></circle>
+            <circle cx="37" cy="22" r="5" fill="var(--accent)"></circle>
+            <path d="M37,7 L37,16 M52,22 L43,22 M37,37 L37,28 M22,22 L31,22" stroke="var(--accent)" stroke-width="2"></path>
+          </svg>
+          <div class="pad-name">KICK PEDAL</div>
+          <div class="pad-sub">foot → kick / bass</div>
+          <span class="pad-key">press SPACE</span>
+          <div class="change-sample"><button type="button" class="change-btn" data-row="kick">Change Sample</button><div class="sample-name"><span id="sampleName-kick">Punchy Tight Kick</span></div></div>
+        </div>
+        <div class="pad" id="padMelody" role="button" tabindex="0" aria-label="Melody pad — play the piano roll below with the top letter row and number row of your keyboard">
+          <svg class="eye" viewBox="0 0 74 44" aria-hidden="true">
+            <rect x="8" y="10" width="58" height="24" rx="4" fill="none" stroke="var(--accent)" stroke-width="2.5"></rect>
+            <path d="M18,10 L18,22 M28,10 L28,22 M44,10 L44,22 M54,10 L54,22" stroke="var(--accent)" stroke-width="2.5"></path>
+            <circle cx="37" cy="38" r="3" fill="var(--accent)"></circle>
+          </svg>
+          <div class="pad-name">MELODY KEYS</div>
+          <div class="pad-sub" id="melodyState">guitar · bass · synth · bells</div>
+          <span class="pad-key">Tab–\ + number row · PageUp = octave up</span>
+          <div class="change-sample"><button type="button" class="change-btn" data-row="melody">Change Sample</button><div class="sample-name"><span id="sampleName-melody">Clean Electric Guitar</span></div></div>
+        </div>
+      </div>
+
+      <div class="melody-roll" aria-label="Melody piano roll — separate from the hi-hat grid">
+        <div class="melody-roll-head"><b>Piano Roll · Melody — separate from the hi-hat blueprint</b><span>26 NOTES · FULL OCTAVE REACH · 9 SOUNDS</span></div>
+        <p>This is the <b>fourth channel</b>. The hi-hats keep their own grid up top — this roll is for tune. Play it two ways: click any key here, or use your computer keyboard. The <b>number row (1 2 3 4 5 6 7 8 9 0 - =)</b> is the low octave. The high row now runs the <b>full octave reach — Tab, Q W E R T Y U I O P [ ] and \</b>: Tab tucks the B in just under the octave, Q starts on C, and the backslash lands the top C — C to C, nothing missing. Need it higher? <b>PageUp</b> throws the whole roll up an octave (press again to climb higher; PageDown walks it back down). While the loop plays, every note you hit is quantized into the <b>MELODY</b> row of the grid above and plays back in the loop. Change the sound with the melody pad's <b>Change Sample</b> button — guitar, bass, synths, bells and arps, nine in all. The MELODY row in the grid works differently from the drums: <b>single-click any melody step</b> and a key picker pops up showing the key names — click a name to set it, or <b>scroll the mouse wheel</b> over the step or the picker to run the key up and down (each change plays, so you hear it). <b>Double-click a melody step to remove it</b> from the sequencer. Kick, clap and hat steps stay plain single-click toggles.</p>
+        <div id="melodyRoll"></div>
+      </div>
+
+      <p class="status" id="status">Grid is loaded with a starter pattern — now with a <b>MELODY</b> row too. Hit <b>Play</b> — and for the hats, set a step up top, then press the piano <b>once</b>: one press sets the blueprint. Play the tune on the <b>number row + the Tab-to-\ row</b> using the piano roll below — <b>PageUp</b> jumps it up an octave. In the grid, <b>single-click a MELODY step to pick its key</b> (mouse or scroll wheel), <b>double-click it to remove it</b> — every other row is still a single-click toggle. Or watch the slow demonstration first.</p>
+    </div>
+    <p class="fig-cap"><b>FIG. 2</b> — Live hits are quantized to the nearest step and written into the loop, so one performed pass becomes a finished pattern.</p>
+  </section>
+
+  <!-- ============ THE THREE CHANNELS ============ -->
+  <section>
+    <div class="sec-head"><span class="sec-num">DETAIL</span><h2>Why each body part gets its job</h2></div>
+    <p class="sec-sub">The assignments aren't random. Each channel goes to the body part whose natural motion already matches the part's role in a beat.</p>
+    <div class="channels">
+      <div class="chan">
+        <span class="tag">Channel 1 · Eyes or Voice</span>
+        <h3>Blink — or Say It → Clap</h3>
+        <p>Two ways to fire the same clap. A webcam watches your eyes and every deliberate blink triggers it — or you talk into a mic and just say “clap.”</p>
+        <p class="why">Claps live on the backbeat — beats 2 and 4 — sparse and accented, and both triggers match that: occasional, sharp, deliberate. The voice option is Terrence's contribution: for the takes where your eyes are busy watching the screen, your mouth calls the clap instead.</p>
+      </div>
+      <div class="chan">
+        <span class="tag">Channel 2 · Finger</span>
+        <h3>One Press → Hi-Hat Roll</h3>
+        <p>One finger, one press on the piano. Beforehand you set the step — a hat every 1, 2, 4, 8, or 16 steps — and that single press writes the whole roll into the grid at that spacing: a blueprint, set once. From there the beat just plays the blueprint — the hats roll step by step in the grid while the finger does nothing. Press again and you set a new blueprint.</p>
+        <p class="why">Hats are the fastest, densest layer of a beat, and producers burn minutes drawing them into a piano roll one note at a time. Here the spacing is pre-set and the performance is a single press: the finger doesn't strike each hat, it lays down the plan — once.</p>
+      </div>
+      <div class="chan">
+        <span class="tag">Channel 3 · Foot</span>
+        <h3>Pedal → Kick / Bass</h3>
+        <p>An electric drum kick pedal plugs straight in. Every stomp is a kick drum — or pitched as the bass line itself.</p>
+        <p class="why">Real drummers have always played the kick with a foot, because the kick is the heartbeat and feet are metronomes. It is also the one channel that needs zero learning curve: if you can tap your foot to a song, you can play this.</p>
+      </div>
+      <div class="chan">
+        <span class="tag">Channel 4 · Two Keyboard Rows</span>
+        <h3>Top Rows → Melody</h3>
+        <p>The newest channel gets its own piano roll, separate from the hi-hat diagram: the number row plays the low octave, and the high row runs Tab to backslash — Tab adds the B tucked under the C, the backslash reaches the top C, a full octave with nothing missing — and PageUp throws the whole roll up an octave when you need more sky. 26 notes under your fingertips, no extra hardware.</p>
+        <p class="why">B, F and Space were already spoken for by clap, hats and kick, so the tune had to live somewhere untouched. The two rows you never use mid-beat became the instrument: nine sounds — guitar, bass, synths, bells and arpeggios — one Change Sample button away.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FIG 3 : ONE PASS ============ -->
+  <section>
+    <div class="sec-head"><span class="sec-num">FIG. 3</span><h2>One pass, four bars, finished beat</h2></div>
+    <p class="sec-sub">Because all three channels record simultaneously, the beat doesn't get built layer by layer over an hour. It stacks up in real time — by the fourth bar, it's done.</p>
+    <div class="panel">
+      <svg viewBox="0 0 920 306" width="100%" role="img" aria-label="Layer diagram showing the same 16-step grid across four bars: bar one has only the kick, bar two adds the hi-hat blueprint, bar three adds claps on the backbeat, and bar four is the complete beat with all three parts playing.">
+        <!-- bar columns: each bar starts at x = 150 + bar × 185 -->
+        <g font-size="13" font-weight="600" fill="var(--accent)">
+          <text x="150" y="28">BAR 1</text>
+          <text x="335" y="28">BAR 2</text>
+          <text x="520" y="28">BAR 3</text>
+          <text x="705" y="28">BAR 4</text>
+        </g>
+        <g font-size="11.5" fill="var(--muted)">
+          <text x="150" y="48">foot finds it</text>
+          <text x="335" y="48">finger joins</text>
+          <text x="520" y="48">eyes answer</text>
+          <text x="705" y="48">the beat, whole</text>
+        </g>
+
+        <!-- row guides: rows match the channel rack above — clap, hat, kick -->
+        <g font-size="12" font-weight="600" fill="var(--muted)">
+          <text x="20" y="108">CLAP</text>
+          <text x="20" y="172">HAT</text>
+          <text x="20" y="236">KICK</text>
+        </g>
+
+        <!-- cells drawn by script: rows y=84 (clap), 148 (hat), 212 (kick) -->
+        <g id="fig3cells"></g>
+
+        <!-- result -->
+        <rect x="150" y="270" width="714" height="1.5" fill="var(--line)"></rect>
+        <text x="150" y="294" font-size="12.5" fill="var(--muted)">Total studio time: <tspan fill="var(--accent)" font-weight="600">four bars.</tspan> Total notes drawn by hand: <tspan fill="var(--accent)" font-weight="600">zero.</tspan></text>
+      </svg>
+      <p class="fig-cap"><b>FIG. 3</b> — The stack-up. Old way: draw every cell above with a mouse. This way: play them.</p>
+    </div>
+  </section>
+
+  <!-- ============ THE NOTE ============ -->
+  <section>
+    <div class="sec-head"><span class="sec-num">SOURCE</span><h2>The idea, in the inventor's own hand</h2></div>
+    <p class="sec-sub">Written on a receipt, the way real inventions start. Transcribed:</p>
+    <div class="note">
+      <span class="tag">Handwritten note · BW Young Bo</span>
+      <blockquote>
+        <p>— Webcam, use eyes and blink to make clap pattern</p>
+        <p>— Set hi hat rolls, 4ths, 8ths, 16ths, use finger on keyboard</p>
+        <p>— Plug in a electric drum kick to make the bass or kick pattern</p>
+      </blockquote>
+    </div>
+  </section>
+
+  <!-- ============ THE ASK ============ -->
+  <section>
+    <div class="sec-head"><span class="sec-num">THE ASK</span><h2>Somebody build this into a real plugin</h2></div>
+    <p class="sec-sub">Everything above is a working toy — proof the idea plays. What it wants to be is a real plugin inside a real DAW. Here's the case, plain:</p>
+    <div class="channels">
+      <div class="chan">
+        <span class="tag">Why it wins · Speed</span>
+        <h3>The piano roll is the bottleneck</h3>
+        <p>Most of making a beat isn't music — it's drawing. Hundreds of mouse clicks to place hats one note at a time, an hour gone before anything grooves.</p>
+        <p class="why">The Instant Beat replaces drawing with playing. A full beat lands in one four-bar pass, and what's left of the work is the part producers actually love: the performing.</p>
+      </div>
+      <div class="chan">
+        <span class="tag">Why it wins · Access</span>
+        <h3>Beats for bodies the mouse locked out</h3>
+        <p>Two of the four channels need no hands at all: eyes or voice fire the clap, a foot plays the kick. The finger's whole job is one press.</p>
+        <p class="why">For beatmakers with limited hand mobility — or anyone whose hands are busy holding an instrument — this isn't a shortcut. It's the door.</p>
+      </div>
+      <div class="chan">
+        <span class="tag">Why it wins · Live</span>
+        <h3>It's a performance, not a file</h3>
+        <p>A beat built this way can be watched. On stage or on stream, an audience sees it played into existence in one pass — no menus, no mouse, nothing to hide behind.</p>
+        <p class="why">Producers are performers now. This is the first drum workflow designed like it.</p>
+      </div>
+      <div class="chan">
+        <span class="tag">Why it's buildable · Today</span>
+        <h3>Small plugin, any DAW</h3>
+        <p>Under the hood it's a MIDI instrument: webcam blink detection, a mic listening for one word, a pedal input — all writing quantized MIDI into the host.</p>
+        <p class="why">One VST3 / AU plugin — JUCE is the obvious road — drops into FL Studio, Ableton, Logic, any of them. No DAW has to change a thing. The demo on this page is the spec; the sounds above are already synthesized from nothing but math.</p>
+      </div>
+    </div>
+    <div class="note" style="margin-top:16px">
+      <span class="tag">The terms · From the inventor</span>
+      <blockquote>
+        <p>It's free for anyone smart to make and profit from. The only ask: say the idea came from BW Young Bo — and the say-“clap” mic trigger came from Terrence.</p>
+      </blockquote>
+      <p style="margin:16px 0 0">If you build plugins, this page is yours to build from. Ship it, sell it, put it on stages — just say where it came from.</p>
+    </div>
+  </section>
+
+  <footer>
+    <p class="coined">Coined by <em>BW Young Bo</em> — free for anyone smart to make and profit from. The only ask: <em>say the idea came from him.</em> The say-“clap”-in-the-mic trigger was contributed by <em>Terrence</em>, his co-best friend.</p>
+    <p class="small">INSTANT BEAT DIAGRAM · PERFORMED, NOT PROGRAMMED · COMPANION TO THE COMPLETION FILTER PAGES</p>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- FIG 3 cells (drawn by script to keep markup small) ---------- */
+  var fig3 = document.getElementById("fig3cells");
+  if (fig3) {
+    var SVGNS = "http://www.w3.org/2000/svg";
+    var rows = [84, 148, 212]; // clap, hat, kick — cell height 40, row gap 24
+    // patterns per bar (which of the 4 quarter-cells are lit), growth across bars
+    var lit = {
+      kick: [[0,2],[0,2],[0,2],[0,2]],
+      hat:  [[],  [0,1,2,3],[0,1,2,3],[0,1,2,3]],
+      clap: [[],  [],      [1,3],    [1,3]]
+    };
+    var order = ["clap","hat","kick"];
+    // geometry: cell 36 wide, 5px inside a bar; bar = 159 wide; bars step 185 (26px gutter holds the +)
+    var html = "";
+    for (var b = 0; b < 4; b++) {
+      var bx = 150 + b * 185;
+      for (var r = 0; r < 3; r++) {
+        var name = order[r];
+        for (var c = 0; c < 4; c++) {
+          var x = bx + c * 41;
+          var on = lit[name][b].indexOf(c) !== -1;
+          html += '<rect x="' + x + '" y="' + rows[r] + '" width="36" height="40" rx="6" fill="' +
+            (on ? "var(--accent)" : "var(--cell)") + '" stroke="var(--line)"' +
+            (on ? ' class="f3on" style="animation-delay:' + (b * 0.9 + c * 0.15).toFixed(2) + 's"' : "") + '></rect>';
+        }
+      }
+      if (b < 3) {
+        html += '<text x="' + (bx + 172) + '" y="176" font-size="20" font-weight="600" fill="var(--accent)" text-anchor="middle">+</text>';
+      }
+    }
+    fig3.innerHTML = html;
+  }
+
+  /* ---------- Demo: step sequencer + live performance ---------- */
+  var ROWS = ["kick", "clap", "hat", "melody"];
+  var LABELS = { kick: "KICK", clap: "CLAP", hat: "HAT", melody: "MELODY" };
+  var pattern = {
+    kick: [1,0,0,0, 0,0,0,1, 0,0,1,0, 0,0,0,0],
+    clap: [0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0],
+    hat:  [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1],
+    melody: [261.63,0,0,329.63, 0,0,392.00,0, 440.00,0,0,392.00, 0,329.63,0,0]
+  };
+
+  var seqEl = document.getElementById("seq");
+  var numsEl = document.getElementById("stepNums");
+  var cells = {}; // cells[row][step] -> button
+  var i, s, r;
+
+  var numsHtml = "<span></span>";
+  for (s = 0; s < 16; s++) {
+    numsHtml += '<span class="' + (s % 4 === 0 ? "beat" : "") + '">' + (s + 1) + "</span>";
+  }
+  numsEl.innerHTML = numsHtml;
+  var numSpans = numsEl.querySelectorAll("span");
+
+  /* ---------- Melody step key picker ----------
+     MELODY steps are NOT toggles. Single-click opens this picker (key names,
+     C3–C5); pick with the mouse or cycle with the scroll wheel. Double-click
+     a melody step removes it. Every other row keeps the single-click toggle. */
+  var PICKER_NOTE_NAMES = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+  var PICKER_MIN = 48, PICKER_MAX = 72; // MIDI C3..C5
+  function freqToMidi(freq){ return Math.round(69 + 12 * Math.log2(freq / 440)); }
+  function midiToFreq(m){ return 440 * Math.pow(2, (m - 69) / 12); }
+  function midiToName(m){ return PICKER_NOTE_NAMES[((m % 12) + 12) % 12] + (Math.floor(m / 12) - 1); }
+  function melodyNoteName(freq){ return freq ? midiToName(freqToMidi(freq)) : ""; }
+  function syncMelodyCell(step){
+    var cell = cells.melody && cells.melody[step];
+    if (!cell) return;
+    var val = pattern.melody[step];
+    cell.classList.toggle("on", !!val);
+    var lbl = cell.querySelector(".note-name");
+    if (lbl) lbl.textContent = val ? melodyNoteName(val) : "";
+    cell.setAttribute("aria-label", "MELODY step " + (step + 1) + (val ? ", key " + melodyNoteName(val) + " — click to change key, double-click to remove" : ", empty — click to set a key"));
+  }
+  var pickerEl = null, pickerListEl = null, pickerCurEl = null, pickerHeadEl = null;
+  var pickerStep = -1, pickerMidi = 60;
+  var melodyClickTimer = null, melodyLastClick = { step: -1, time: 0 };
+  function closePicker(){
+    if (pickerEl) pickerEl.style.display = "none";
+    if (pickerStep >= 0 && cells.melody && cells.melody[pickerStep]) cells.melody[pickerStep].classList.remove("picker-open");
+    pickerStep = -1;
+  }
+  function renderPicker(){
+    if (!pickerEl) return;
+    pickerHeadEl.textContent = "MELODY STEP " + (pickerStep + 1) + " · KEY";
+    pickerCurEl.textContent = midiToName(pickerMidi);
+    pickerListEl.querySelectorAll(".note-opt").forEach(function(opt){
+      var on = parseInt(opt.getAttribute("data-midi"), 10) === pickerMidi;
+      opt.classList.toggle("active", on);
+      if (on) opt.scrollIntoView({ block: "nearest" });
+    });
+  }
+  function previewMelodyStep(step){
+    ensureAudio();
+    if (actx && pattern.melody[step]) playMelody(pattern.melody[step], actx.currentTime);
+  }
+  function setMelodyStepMidi(step, midi, preview){
+    pickerMidi = Math.max(PICKER_MIN, Math.min(PICKER_MAX, midi));
+    pattern.melody[step] = midiToFreq(pickerMidi);
+    syncMelodyCell(step);
+    renderPicker();
+    if (preview) previewMelodyStep(step);
+    statusEl.innerHTML = "<b>MELODY step " + (step + 1) + " → key " + midiToName(pickerMidi) + "</b> (" + MELODY_BANKS[sampleIdx.melody].name + "). Scroll the wheel to keep changing it, click a key name to set it, click anywhere else to close the picker — or double-click the step to remove it.";
+  }
+  function ensurePicker(){
+    if (pickerEl) return pickerEl;
+    pickerEl = document.createElement("div");
+    pickerEl.className = "note-picker";
+    pickerEl.style.display = "none";
+    pickerEl.setAttribute("role", "dialog");
+    pickerEl.setAttribute("aria-label", "Choose the key for this melody step");
+    var head = document.createElement("div"); head.className = "note-picker-head";
+    var cur = document.createElement("div"); cur.className = "note-picker-cur";
+    var sub = document.createElement("div"); sub.className = "note-picker-sub";
+    sub.textContent = "Click a key name — or scroll the wheel to run the key up and down.";
+    pickerListEl = document.createElement("div"); pickerListEl.className = "note-picker-list"; pickerListEl.setAttribute("role", "listbox");
+    for (var m = PICKER_MIN; m <= PICKER_MAX; m++) {
+      (function(midi){
+        var opt = document.createElement("button");
+        opt.type = "button";
+        opt.className = "note-opt";
+        opt.setAttribute("data-midi", midi);
+        opt.setAttribute("role", "option");
+        opt.textContent = midiToName(midi);
+        opt.addEventListener("click", function(e){
+          e.stopPropagation();
+          if (pickerStep >= 0) { setMelodyStepMidi(pickerStep, midi, true); closePicker(); }
+        });
+        pickerListEl.appendChild(opt);
+      })(m);
+    }
+    var foot = document.createElement("div"); foot.className = "note-picker-foot";
+    foot.textContent = "Double-click the step itself to remove the note from the sequencer.";
+    pickerEl.appendChild(head); pickerEl.appendChild(cur); pickerEl.appendChild(sub);
+    pickerEl.appendChild(pickerListEl); pickerEl.appendChild(foot);
+    pickerHeadEl = head; pickerCurEl = cur;
+    pickerEl.addEventListener("wheel", function(e){
+      e.preventDefault();
+      if (pickerStep < 0) return;
+      var d = e.deltaY > 0 ? 1 : (e.deltaY < 0 ? -1 : 0);
+      if (d) setMelodyStepMidi(pickerStep, pickerMidi + d, true);
+    }, { passive: false });
+    pickerEl.addEventListener("pointerdown", function(e){ e.stopPropagation(); });
+    document.body.appendChild(pickerEl);
+    return pickerEl;
+  }
+  function openPicker(step, cell){
+    ensurePicker();
+    if (pickerStep >= 0 && pickerStep !== step && cells.melody[pickerStep]) cells.melody[pickerStep].classList.remove("picker-open");
+    pickerStep = step;
+    if (!pattern.melody[step]) {
+      // Clicking an empty melody step sets the home key, C4 — then you change it.
+      pattern.melody[step] = midiToFreq(60);
+      syncMelodyCell(step);
+      previewMelodyStep(step);
+    }
+    pickerMidi = Math.max(PICKER_MIN, Math.min(PICKER_MAX, freqToMidi(pattern.melody[step])));
+    cell.classList.add("picker-open");
+    pickerEl.style.display = "block";
+    renderPicker();
+    // Position under the step (above it if the viewport runs out below)
+    var rect = cell.getBoundingClientRect();
+    var pw = 188, ph = pickerEl.offsetHeight || 330;
+    var left = Math.max(8, Math.min(window.innerWidth - pw - 8, rect.left + rect.width / 2 - pw / 2));
+    var top = rect.bottom + 8;
+    if (top + ph > window.innerHeight - 8) top = Math.max(8, rect.top - ph - 8);
+    pickerEl.style.left = left + "px";
+    pickerEl.style.top = top + "px";
+    statusEl.innerHTML = "<b>MELODY step " + (step + 1) + " — key picker open.</b> Current key: <b>" + midiToName(pickerMidi) + "</b>. Click a key name, or scroll the wheel over the step or this picker to change it. Double-click the step to remove the note.";
+  }
+  function clearMelodyStep(step){
+    if (pickerStep === step) closePicker();
+    if (!pattern.melody[step]) { syncMelodyCell(step); return; }
+    pattern.melody[step] = 0;
+    syncMelodyCell(step);
+    statusEl.innerHTML = "<b>MELODY step " + (step + 1) + " removed.</b> Single-click it any time to set a key again — kick, clap and hat steps never changed: still single-click toggles.";
+  }
+  document.addEventListener("pointerdown", function(e){
+    if (pickerStep < 0 || !pickerEl || pickerEl.style.display === "none") return;
+    if (pickerEl.contains(e.target)) return;
+    if (e.target.closest && e.target.closest(".step.melody-step")) return;
+    closePicker();
+  });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape") closePicker(); });
+  window.addEventListener("resize", function(){ closePicker(); });
+
+  ROWS.forEach(function(row){
+    var lab = document.createElement("div");
+    lab.className = "row-label";
+    lab.id = "label-" + row;
+    lab.textContent = LABELS[row];
+    seqEl.appendChild(lab);
+    cells[row] = [];
+    for (s = 0; s < 16; s++) {
+      (function(row, s){
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "step grp" + (Math.floor(s / 4) % 2) + (s % 4 === 0 ? " beat" : "") + (pattern[row][s] ? " on" : "") + (row === "melody" ? " melody-step" : "");
+        if (row === "melody") {
+          var nl = document.createElement("span");
+          nl.className = "note-name";
+          nl.textContent = pattern[row][s] ? melodyNoteName(pattern[row][s]) : "";
+          b.appendChild(nl);
+          b.setAttribute("aria-label", "MELODY step " + (s + 1) + (pattern[row][s] ? ", key " + melodyNoteName(pattern[row][s]) + " — click to change key, double-click to remove" : ", empty — click to set a key"));
+        } else {
+          b.setAttribute("aria-label", LABELS[row] + " step " + (s + 1) + (pattern[row][s] ? ", on" : ", off"));
+        }
+        b.addEventListener("click", function(e){
+          if (row === "melody") {
+            // Single click opens the key picker; a fast second click (or a
+            // real dblclick) removes the step instead. The picker waits out
+            // the double-click window before opening so the two never fight.
+            var now = Date.now();
+            var isDouble = e.detail === 2 || (melodyLastClick.step === s && now - melodyLastClick.time < 350);
+            if (melodyClickTimer) { clearTimeout(melodyClickTimer); melodyClickTimer = null; }
+            if (isDouble) {
+              melodyLastClick = { step: -1, time: 0 };
+              clearMelodyStep(s);
+              return;
+            }
+            melodyLastClick = { step: s, time: now };
+            melodyClickTimer = setTimeout(function(){
+              melodyClickTimer = null;
+              melodyLastClick = { step: -1, time: 0 };
+              openPicker(s, b);
+            }, 280);
+            return;
+          }
+          pattern[row][s] = pattern[row][s] ? 0 : 1;
+          b.classList.toggle("on", !!pattern[row][s]);
+          b.setAttribute("aria-label", LABELS[row] + " step " + (s + 1) + (pattern[row][s] ? ", on" : ", off"));
+          if (pattern[row][s]) { ensureAudio(); playSound(row, actx ? actx.currentTime : 0, 0.9); }
+        });
+        if (row === "melody") {
+          b.addEventListener("dblclick", function(e){
+            e.preventDefault();
+            if (melodyClickTimer) { clearTimeout(melodyClickTimer); melodyClickTimer = null; }
+            melodyLastClick = { step: -1, time: 0 };
+            clearMelodyStep(s);
+          });
+          b.addEventListener("wheel", function(e){
+            // Scroll wheel over a melody step: pop the picker up and run the key.
+            e.preventDefault();
+            if (melodyClickTimer) { clearTimeout(melodyClickTimer); melodyClickTimer = null; }
+            if (pickerStep !== s) openPicker(s, b);
+            var d = e.deltaY > 0 ? 1 : (e.deltaY < 0 ? -1 : 0);
+            if (d) setMelodyStepMidi(s, pickerMidi + d, true);
+          }, { passive: false });
+        }
+        seqEl.appendChild(b);
+        cells[row].push(b);
+      })(row, s);
+    }
+  });
+
+  /* ---------- Audio: all drums synthesized, no samples ---------- */
+  var actx = null, master = null, noiseBuf = null;
+  function ensureAudio(){
+    if (actx) { if (actx.state === "suspended") actx.resume(); return; }
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    actx = new AC();
+    master = actx.createGain();
+    master.gain.value = 0.85;
+    master.connect(actx.destination);
+    var len = actx.sampleRate * 1;
+    noiseBuf = actx.createBuffer(1, len, actx.sampleRate);
+    var d = noiseBuf.getChannelData(0);
+    for (var i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+  }
+  /* ---- SAMPLE BANKS — crisp, clean variants synthesized live (no files to load, no crackle) ---- */
+  var SAMPLE_BANKS = {
+    kick: [
+      {name:"Punchy Tight Kick", start:165, end:48, pitchDur:0.11, decay:0.26, gain:1.0, click:0.18},
+      {name:"808 Deep Boom", start:138, end:30, pitchDur:0.18, decay:0.58, gain:1.05, click:0.06},
+      {name:"Vinyl Thump", start:118, end:38, pitchDur:0.13, decay:0.34, gain:0.95, click:0.28},
+      {name:"Electro Punch", start:215, end:56, pitchDur:0.08, decay:0.19, gain:0.92, click:0.22},
+      {name:"Sub Boom Bap", start:96, end:29, pitchDur:0.20, decay:0.44, gain:1.08, click:0.10},
+      {name:"Deep House Four", start:150, end:42, pitchDur:0.14, decay:0.38, gain:0.98, click:0.12},
+      {name:"Hard Knock Kick", start:240, end:60, pitchDur:0.07, decay:0.22, gain:1.0, click:0.35},
+      {name:"Tight Funk Kick", start:182, end:52, pitchDur:0.09, decay:0.18, gain:0.94, click:0.20},
+      {name:"Lo-Fi Dust Kick", start:105, end:36, pitchDur:0.15, decay:0.33, gain:0.92, click:0.30}
+    ],
+    clap: [
+      {name:"Crisp Studio Clap", freq:1500, tailFreq:1200, tail:0.22, bursts:3, gain:0.55},
+      {name:"Trap Snap", freq:2200, tailFreq:1850, tail:0.16, bursts:4, gain:0.50},
+      {name:"Big Room Clap", freq:1050, tailFreq:900, tail:0.38, bursts:3, gain:0.62},
+      {name:"Electro Snap", freq:2600, tailFreq:2100, tail:0.13, bursts:5, gain:0.46},
+      {name:"Dusty Handclap", freq:880, tailFreq:750, tail:0.28, bursts:2, gain:0.58},
+      {name:"Layered Stadium Clap", freq:920, tailFreq:810, tail:0.50, bursts:4, gain:0.66},
+      {name:"Tight Rim Clap", freq:2800, tailFreq:2400, tail:0.10, bursts:2, gain:0.44},
+      {name:"Velvet Handclap", freq:1300, tailFreq:1120, tail:0.30, bursts:3, gain:0.52},
+      {name:"Snappy Finger Clap", freq:1950, tailFreq:1650, tail:0.14, bursts:6, gain:0.48}
+    ],
+    hat: [
+      {name:"Crisp Closed Hat", freq:7800, dur:0.05, gain:0.32},
+      {name:"Bright Sizzle Hat", freq:9800, dur:0.07, gain:0.30},
+      {name:"Tight Chick Hat", freq:8400, dur:0.028, gain:0.36},
+      {name:"Metallic Shaker Hat", freq:6400, dur:0.11, gain:0.28},
+      {name:"Open Wash Hat", freq:7200, dur:0.30, gain:0.26},
+      {name:"Dark Velvet Hat", freq:5200, dur:0.06, gain:0.30},
+      {name:"Ice Pick Hat", freq:11000, dur:0.035, gain:0.28},
+      {name:"Pedal Chick Hat", freq:9050, dur:0.022, gain:0.38},
+      {name:"Golden Shaker Hat", freq:6800, dur:0.16, gain:0.27}
+    ]
+  };
+  var MELODY_BANKS = [
+    {name:"Clean Electric Guitar"},
+    {name:"Deep Electric Bass"},
+    {name:"Warm Analog Synth"},
+    {name:"Crystal Bell"},
+    {name:"Funk Wah Guitar"},
+    {name:"Dream Arp Synth"},
+    {name:"Glass Marimba Bell"},
+    {name:"Fat Sub Bass"},
+    {name:"Starlight Pluck Arp"}
+  ];
+  var sampleIdx = {kick:0, clap:0, hat:0, melody:0};
+  function playKick(t){
+    var s = SAMPLE_BANKS.kick[sampleIdx.kick];
+    var o = actx.createOscillator(), g = actx.createGain();
+    o.type = "sine";
+    o.frequency.setValueAtTime(s.start, t);
+    o.frequency.exponentialRampToValueAtTime(s.end, t + s.pitchDur);
+    g.gain.setValueAtTime(s.gain, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + s.decay);
+    o.connect(g); g.connect(master);
+    o.start(t); o.stop(t + s.decay + 0.05);
+    if (s.click) playNoise(t, 0.02, "highpass", 1200, s.click);
+  }
+  function playNoise(t, dur, filterType, freq, gainVal){
+    var src = actx.createBufferSource(); src.buffer = noiseBuf;
+    var f = actx.createBiquadFilter(); f.type = filterType; f.frequency.value = freq; if(filterType==="bandpass") f.Q.value = 1.1;
+    var g = actx.createGain();
+    g.gain.setValueAtTime(gainVal, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    src.connect(f); f.connect(g); g.connect(master);
+    src.start(t); src.stop(t + dur + 0.05);
+  }
+  function playClap(t){
+    var s = SAMPLE_BANKS.clap[sampleIdx.clap];
+    for (var k = 0; k < s.bursts; k++) playNoise(t + k * 0.011, 0.045, "bandpass", s.freq, 0.48);
+    playNoise(t + 0.028, s.tail, "bandpass", s.tailFreq, s.gain);
+  }
+  function playHat(t, open){
+    var s = SAMPLE_BANKS.hat[sampleIdx.hat];
+    playNoise(t, open ? Math.max(0.22, s.dur) : s.dur, "highpass", s.freq, s.gain);
+  }
+  /* ---- MELODY VOICES — 9 synthesized instruments, no files ---- */
+  function envGain(t, peak, decay){
+    var g = actx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(peak, t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.001, t + decay);
+    g.connect(master); return g;
+  }
+  function osc(type, freq, t, dest){ var o = actx.createOscillator(); o.type = type; o.frequency.value = freq; o.connect(dest); o.start(t); return o; }
+  function playMelody(freq, t){
+    if (!actx || !freq) return;
+    var idx = sampleIdx.melody, i, o, o2, g, f;
+    if (idx === 0) { // Clean Electric Guitar — bright pluck, fast pick attack, ringing body
+      g = envGain(t, 0.34, 0.62); f = actx.createBiquadFilter(); f.type = "lowpass"; f.frequency.setValueAtTime(3400, t); f.frequency.exponentialRampToValueAtTime(700, t + 0.5); f.connect(g);
+      o = osc("triangle", freq, t, f); o.stop(t + 0.7); o2 = osc("square", freq * 2, t, f); var g2 = actx.createGain(); g2.gain.value = 0.18; o2.disconnect(); o2.connect(g2); g2.connect(f); o2.stop(t + 0.3);
+      playNoise(t, 0.018, "highpass", 2500, 0.10);
+    } else if (idx === 1) { // Deep Electric Bass
+      g = envGain(t, 0.5, 0.55); f = actx.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = 620; f.connect(g);
+      o = osc("sawtooth", freq / 2, t, f); o.stop(t + 0.6); o2 = osc("sine", freq / 2, t, g); o2.stop(t + 0.6);
+    } else if (idx === 2) { // Warm Analog Synth — detuned saws through a soft filter
+      g = envGain(t, 0.26, 0.7); f = actx.createBiquadFilter(); f.type = "lowpass"; f.frequency.setValueAtTime(1900, t); f.frequency.exponentialRampToValueAtTime(500, t + 0.6); f.connect(g);
+      o = osc("sawtooth", freq, t, f); o.detune.value = -7; o.stop(t + 0.75); o2 = osc("sawtooth", freq, t, f); o2.detune.value = 7; o2.stop(t + 0.75);
+    } else if (idx === 3) { // Crystal Bell — FM shimmer
+      g = envGain(t, 0.30, 1.35);
+      var car = osc("sine", freq, t, g); car.stop(t + 1.4);
+      var modG = actx.createGain(); modG.gain.setValueAtTime(freq * 1.6, t); modG.gain.exponentialRampToValueAtTime(1, t + 1.1);
+      var mod = actx.createOscillator(); mod.type = "sine"; mod.frequency.value = freq * 2.76; mod.connect(modG); modG.connect(car.frequency); mod.start(t); mod.stop(t + 1.4);
+      var sh = osc("sine", freq * 4.07, t, g); var sg = actx.createGain(); sg.gain.value = 0.25; sh.disconnect(); sh.connect(sg); sg.connect(g); sh.stop(t + 0.5);
+    } else if (idx === 4) { // Funk Wah Guitar — bandpass sweeps up like a wah pedal
+      g = envGain(t, 0.36, 0.42); f = actx.createBiquadFilter(); f.type = "bandpass"; f.Q.value = 3.2; f.frequency.setValueAtTime(480, t); f.frequency.exponentialRampToValueAtTime(2600, t + 0.16); f.frequency.exponentialRampToValueAtTime(700, t + 0.4); f.connect(g);
+      o = osc("sawtooth", freq, t, f); o.stop(t + 0.48); o2 = osc("square", freq, t, f); o2.stop(t + 0.48);
+    } else if (idx === 5) { // Dream Arp Synth — soft triangle with echoing repeats built in
+      [0, 0.14, 0.28].forEach(function(off, k){
+        var gg = envGain(t + off, 0.24 / (k + 1), 0.5);
+        var oo = osc("triangle", freq * (k === 2 ? 2 : 1), t + off, gg); oo.stop(t + off + 0.55);
+      });
+    } else if (idx === 6) { // Glass Marimba Bell — woody attack, glassy ring
+      g = envGain(t, 0.36, 0.55); o = osc("sine", freq, t, g); o.stop(t + 0.6);
+      var g3 = envGain(t, 0.16, 0.18); var o3 = osc("sine", freq * 3.9, t, g3); o3.stop(t + 0.2);
+      playNoise(t, 0.015, "bandpass", 1800, 0.12);
+    } else if (idx === 7) { // Fat Sub Bass — weight you feel
+      g = envGain(t, 0.58, 0.6); o = osc("sine", freq / 2, t, g); o.stop(t + 0.65);
+      var g4 = envGain(t, 0.20, 0.22); var o4 = osc("triangle", freq / 2, t, g4); o4.stop(t + 0.25);
+    } else { // Starlight Pluck Arp — bright pluck that sparkles upward
+      g = envGain(t, 0.30, 0.5); f = actx.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = 4200; f.connect(g);
+      o = osc("square", freq, t, f); o.stop(t + 0.55);
+      var g5 = envGain(t + 0.09, 0.14, 0.42); var o5 = osc("square", freq * 1.5, t + 0.09, g5); o5.stop(t + 0.55);
+    }
+  }
+  function playSound(row, t, vel){
+    if (!actx) return;
+    if (row === "kick") playKick(t);
+    else if (row === "clap") playClap(t);
+    else if (row === "melody") { /* melody handled per-step below */ }
+    else playHat(t, false);
+  }
+
+  /* ---------- Transport / scheduler ---------- */
+  var playing = false, currentStep = 0, nextTime = 0, timerID = null;
+  var demoMode = false, demoTimers = [];
+  var bpm = 120;
+  var playBtn = document.getElementById("playBtn");
+  var statusEl = document.getElementById("status");
+
+  function stepDur(){ return 60 / bpm / 4; }
+
+  function drawStep(step){
+    ROWS.forEach(function(row){
+      cells[row].forEach(function(c, idx){ c.classList.toggle("now", idx === step); });
+    });
+    numSpans.forEach(function(sp, idx){ sp.classList.toggle("now", idx === step + 1); });
+  }
+  function clearDraw(){
+    ROWS.forEach(function(row){ cells[row].forEach(function(c){ c.classList.remove("now"); }); });
+    numSpans.forEach(function(sp){ sp.classList.remove("now"); });
+  }
+  function flashPad(row){
+    var lab = document.getElementById("label-" + row);
+    if (lab) lab.classList.add("hot");
+    var hold = demoMode ? 850 : 130;
+    if (row === "hat") {
+      // Hats: the roll's progress shows on the hat ROW's cells only. The piano
+      // key is never re-lit per hat hit — it lights once, at the one press
+      // that set the blueprint (see lightKeyOnce in fireRoll).
+      setTimeout(function(){ if (lab) lab.classList.remove("hot"); }, hold);
+      return;
+    }
+    var id = row === "clap" ? "padBlink" : (row === "melody" ? "padMelody" : "padKick");
+    var pad = document.getElementById(id);
+    if (!pad) { setTimeout(function(){ if (lab) lab.classList.remove("hot"); }, hold); return; }
+    pad.classList.add("flash");
+    if (row === "clap" && clapMode === "blink") blinkEye();
+    setTimeout(function(){ pad.classList.remove("flash"); if (lab) lab.classList.remove("hot"); }, hold);
+  }
+  function scheduler(){
+    while (nextTime < actx.currentTime + 0.12) {
+      (function(step, t){
+        var delay = Math.max(0, (t - actx.currentTime) * 1000);
+        setTimeout(function(){ if (playing) drawStep(step); }, delay);
+        ROWS.forEach(function(row){
+          if (pattern[row][step]) {
+            if (row === "melody") playMelody(pattern[row][step], t);
+            else playSound(row, t, 1);
+            setTimeout(function(){ flashPad(row); }, delay);
+          }
+        });
+      })(currentStep, nextTime);
+      nextTime += stepDur();
+      currentStep = (currentStep + 1) % 16;
+    }
+  }
+  function start(){
+    ensureAudio();
+    if (!actx) { statusEl.innerHTML = "This browser has no Web Audio — the diagram still stands."; return; }
+    playing = true;
+    currentStep = 0;
+    nextTime = actx.currentTime + 0.06;
+    timerID = setInterval(scheduler, 25);
+    playBtn.textContent = "■ Stop";
+    playBtn.classList.add("playing");
+    statusEl.innerHTML = "Looping. <b>Perform now:</b> B = blink-clap · F = piano, one press · SPACE = kick pedal · <b>Tab–\\ row + number row = melody</b> · PAGEUP = octave up. Hits quantize into the grid.";
+  }
+  function stop(){
+    playing = false;
+    if (timerID) clearInterval(timerID);
+    timerID = null;
+    clearDraw();
+    playBtn.textContent = "▶ Play";
+    playBtn.classList.remove("playing");
+    if (demoMode) endDemo(false);
+    statusEl.innerHTML = "Stopped. Your performed hits are still in the grid — press <b>Play</b> to hear the beat you built.";
+  }
+  playBtn.addEventListener("click", function(){ playing ? stop() : start(); });
+
+  /* ---------- The slow demonstration: the TEMPO itself drops to 12 BPM ----------
+     No stretched steps, no fake timing — the bpm really goes down. At 12 BPM
+     a step lasts 60/12/4 = 1.25s, so one full 16-step pass takes ~20 seconds
+     and the foot, the blink, and the one blueprint-setting press land one at
+     a time, seconds apart. The listener's tempo is restored when it ends. */
+  var savedBpm = null;
+  function endDemo(finished){
+    demoTimers.forEach(function(t){ clearTimeout(t); });
+    demoTimers = [];
+    demoMode = false;
+    if (savedBpm !== null) {
+      bpm = savedBpm;
+      bpmInput.value = savedBpm;
+      bpmOut.textContent = savedBpm + " BPM";
+      savedBpm = null;
+    }
+    var db = document.getElementById("demoBtn");
+    if (db) { db.disabled = false; db.textContent = "▶ Watch it demonstrated — slowly"; }
+    if (finished) {
+      statusEl.innerHTML = "That's one full pass at <b>12 BPM</b> — the tempo itself slowed, so the loop took about 20 seconds: foot, blink, one press that set the hat blueprint, blink. Tempo's back where you left it. Press <b>Play</b> to keep it rolling, or perform it yourself: B, F, SPACE.";
+    }
+  }
+  function startDemo(){
+    if (demoMode) return;
+    ensureAudio();
+    if (!actx) { statusEl.innerHTML = "This browser has no Web Audio — the diagram still stands."; return; }
+    if (playing) stop();
+    demoMode = true;
+    var db = document.getElementById("demoBtn");
+    db.disabled = true;
+    db.textContent = "Demonstrating…";
+    // Slow the BPM itself down — 12 BPM — then run the normal scheduler on it.
+    savedBpm = bpm;
+    bpm = 12;
+    bpmInput.value = 12;
+    bpmOut.textContent = "12 BPM";
+    start();
+    var sd = stepDur() * 1000; // one step at the slowed tempo (1.25s), in ms
+    function at(steps, fn){ demoTimers.push(setTimeout(fn, steps * sd)); }
+    statusEl.innerHTML = "<b>Watch — the tempo itself drops to 12 BPM.</b> One full pass now takes about 20 seconds. First, the foot: the stomp lands the kick.";
+    at(4, function(){
+      blinkEye(); flashPad("clap");
+      statusEl.innerHTML = "<b>2 · Eyes.</b> One blink fires the clap — or say “clap” into the mic, Terrence's way.";
+    });
+    at(8, function(){
+      fireRoll(329.63);
+      statusEl.innerHTML = "<b>3 · Finger.</b> ONE press — and that's the finger done: the press sets the blueprint, writing the whole hat roll into the grid in a single pass. The key won't strike again; the beat plays the blueprint now. Watch the hats roll through the hat row.";
+    });
+    at(12, function(){
+      blinkEye(); flashPad("clap");
+      statusEl.innerHTML = "<b>4 · Eyes again.</b> The blink answers on the backbeat.";
+    });
+    at(16, function(){ stop(); endDemo(true); });
+  }
+  document.getElementById("demoBtn").addEventListener("click", startDemo);
+
+  var bpmInput = document.getElementById("bpm");
+  var bpmOut = document.getElementById("bpmOut");
+  bpmInput.addEventListener("input", function(){
+    bpm = parseInt(bpmInput.value, 10);
+    bpmOut.textContent = bpm + " BPM";
+  });
+
+  /* ---------- Finger channel: preset the step, ONE press sets the blueprint ---------- */
+  var divSeg = document.getElementById("divSeg");
+  var pianoState = document.getElementById("pianoState");
+  var stepEvery = 2;   // hats land every N steps, set beforehand
+  var rollTimers = [];
+
+  function stepPhrase(){
+    return stepEvery === 1 ? "every step" : "every " + stepEvery + " steps";
+  }
+  function paintPiano(){
+    if (pianoState) pianoState.textContent = "one press sets the blueprint · preset: " + stepPhrase();
+  }
+  function lightKeyOnce(freq){
+    // The press visual: the played key lights exactly ONCE, at the moment of
+    // the press. Individual hat hits never light a key — their progress is
+    // shown on the hat row's cells instead.
+    var keys = document.querySelectorAll("#piano .wkey, #piano .bkey");
+    if (!keys.length) return;
+    var target = null;
+    keys.forEach(function(k){ if (parseFloat(k.getAttribute("data-freq")) === freq) target = k; });
+    if (!target) target = keys[0];
+    target.classList.add("lit");
+    setTimeout(function(){ target.classList.remove("lit"); }, 380);
+  }
+  function playNote(freq, t){
+    if (!actx) return;
+    var o = actx.createOscillator(), g = actx.createGain();
+    o.type = "triangle";
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.22, t + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
+    o.connect(g); g.connect(master);
+    o.start(t); o.stop(t + 0.5);
+  }
+  function fireRoll(freq){
+    ensureAudio();
+    if (actx) playNote(freq || 261.63, actx.currentTime);
+    // The ONE press: the key lights once, and the press SETS the blueprint —
+    // the roll is written into the hat row at the preset spacing, all at once.
+    lightKeyOnce(freq || 261.63);
+    var hatLab = document.getElementById("label-hat");
+    if (hatLab) { hatLab.classList.add("hot"); setTimeout(function(){ hatLab.classList.remove("hot"); }, 300); }
+    var count = 0;
+    for (var s2 = 0; s2 < 16; s2++) {
+      var on = s2 % stepEvery === 0 ? 1 : 0;
+      if (on) count++;
+      pattern.hat[s2] = on;
+      cells.hat[s2].classList.toggle("on", !!on);
+      cells.hat[s2].setAttribute("aria-label", "HAT step " + (s2 + 1) + (on ? ", on" : ", off"));
+    }
+    if (!playing && actx) {
+      // Sequencer stopped: play the blueprint through once so the set roll is
+      // heard — progress lights the hat ROW's cells only, never the keys.
+      rollTimers.forEach(function(t){ clearTimeout(t); });
+      rollTimers = [];
+      var t0 = actx.currentTime + 0.03, sd = stepDur();
+      for (var k2 = 0; k2 * stepEvery < 16; k2++) {
+        (function(k2){
+          var tt = t0 + k2 * stepEvery * sd;
+          playHat(tt, false);
+          var st = k2 * stepEvery;
+          var delay = Math.max(0, (tt - actx.currentTime) * 1000);
+          rollTimers.push(setTimeout(function(){
+            cells.hat[st].classList.add("now");
+            setTimeout(function(){ cells.hat[st].classList.remove("now"); }, Math.min(320, sd * 600));
+          }, delay));
+        })(k2);
+      }
+    }
+    statusEl.innerHTML = "<b>Blueprint set — one press.</b> " + count + " hats written into the grid at once, " + (stepEvery === 1 ? "one on every single step — the full wall of hats" : "one every " + stepEvery + " steps") + ". The beat plays the blueprint from here — the key won't strike again until you press it again.";
+  }
+  divSeg.addEventListener("click", function(e){
+    var btn = e.target.closest("button");
+    if (!btn) return;
+    divSeg.querySelectorAll("button").forEach(function(b){ b.classList.remove("active"); });
+    btn.classList.add("active");
+    stepEvery = parseInt(btn.getAttribute("data-step"), 10);
+    paintPiano();
+    statusEl.innerHTML = "Hat step preset: <b>" + stepPhrase() + "</b>. Now press the piano <b>once</b> — that single press sets the whole blueprint into the grid.";
+  });
+
+  /* ---------- Hi-Hat Pattern Randomizer — unique grooves, not just spacing ---------- */
+  var HAT_PATTERNS = [
+    {name:"CLASSIC 8THS", sub:"2 per beat · clean & driving", steps:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0]},
+    {name:"3 PER BEAT · TRIPLET BOUNCE", sub:"3 in every 4 · bouncy, rolling", steps:[1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1]},
+    {name:"OFFBEAT GHOST", sub:"2 per beat · only the offbeats", steps:[0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1]},
+    {name:"TRAP STUTTER", sub:"bursts + gaps · modern trap feel", steps:[1,1,0,1,1,1,0,0,1,1,0,1,1,1,1,0]},
+    {name:"SYNCOPATED SKIP", sub:"sparse & funky · lots of air", steps:[1,0,0,1,0,0,1,0,1,0,0,1,0,1,0,0]},
+    {name:"DENSE 3+1 ROLL", sub:"3 in every 4 + extra push", steps:[1,1,1,0,1,1,1,0,1,1,1,0,1,1,0,1]},
+    {name:"BOUNCE GROOVE", sub:"swing pocket · head-nod", steps:[1,0,1,1,0,1,1,0,1,0,1,1,0,1,0,1]},
+    {name:"SPARSE POCKET", sub:"1–2 per bar · lets kick & clap breathe", steps:[1,0,0,0,0,1,0,0,1,0,0,0,0,0,1,0]},
+    {name:"DOUBLE-TIME WALL", sub:"1-step wall · full tisk, no air", steps:[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]},
+    {name:"GALLOP", sub:"1 + 2 per beat · galloping drive", steps:[1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,0]},
+    {name:"EUCLID FIVE", sub:"5 hats spread even over the bar · world-music math", steps:[1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,0]},
+    {name:"LATE SWING POCKET", sub:"pairs dragged late · lazy, heavy swing", steps:[0,0,1,1,0,0,1,1,0,0,1,1,0,1,1,0]},
+    {name:"AFROBEAT SKIP", sub:"interlocking skip · never sits square", steps:[1,0,1,0,0,1,0,1,1,0,1,0,0,1,0,0]},
+    {name:"BURST & BREATHE", sub:"dense bursts, then air · drama in the gaps", steps:[1,1,1,1,0,0,1,1,0,0,0,0,1,1,1,0]}
+  ];
+  var hatPatternIdx = 8;
+  var patternNameEl = document.getElementById("hatPatternName");
+  var patternDotsEl = document.getElementById("patternDots");
+  function renderPatternDots(steps){
+    if(!patternDotsEl) return;
+    patternDotsEl.innerHTML = steps.map(function(v){ return '<i class="'+(v?'on':'')+'"></i>'; }).join("");
+  }
+  function applyHatPattern(idx, announce){
+    hatPatternIdx = idx;
+    var p = HAT_PATTERNS[idx];
+    for(var si=0; si<16; si++){
+      pattern.hat[si]=p.steps[si];
+      cells.hat[si].classList.toggle("on", !!p.steps[si]);
+      cells.hat[si].setAttribute("aria-label","HAT step "+(si+1)+(p.steps[si]?", on":", off"));
+    }
+    if(patternNameEl) patternNameEl.innerHTML = p.name + "<small>"+p.sub+" · "+p.steps.filter(Boolean).length+" hats in the bar</small>";
+    renderPatternDots(p.steps);
+    if(announce){
+      ensureAudio();
+      // preview: play the pattern once through at current tempo if not already looping
+      if(!playing && actx){
+        var t0=actx.currentTime+0.03, sd=stepDur();
+        p.steps.forEach(function(on,si2){ if(on) playHat(t0+si2*sd,false); });
+      }
+      statusEl.innerHTML = "<b>Hi-hat pattern "+(idx+1)+" of "+HAT_PATTERNS.length+": "+p.name+"</b> — "+p.sub+". "+p.steps.filter(Boolean).length+" hats written to the grid. Hit Play to loop it, or press Next to toggle to the next one — after the last it wraps back to the first.";
+    }
+  }
+  renderPatternDots(HAT_PATTERNS[8].steps);
+  var hatRandomBtn = document.getElementById("hatRandomBtn");
+  if(hatRandomBtn){
+    hatRandomBtn.addEventListener("click", function(e){
+      e.stopPropagation();
+      var next = (hatPatternIdx + 1) % HAT_PATTERNS.length; // toggle through in order, then wrap back to the start
+      applyHatPattern(next, true);
+      hatRandomBtn.animate([{transform:"scale(1)"},{transform:"scale(1.06)"},{transform:"scale(1)"}],{duration:220});
+    });
+  }
+
+  /* ---------- Change Sample buttons — 9 sounds per voice, toggle through ---------- */
+  document.querySelectorAll(".change-btn").forEach(function(btn){
+    btn.addEventListener("pointerdown", function(e){ e.stopPropagation(); });
+    btn.addEventListener("click", function(e){
+      e.stopPropagation();
+      var row = btn.getAttribute("data-row");
+      var bank = row === "melody" ? MELODY_BANKS : SAMPLE_BANKS[row];
+      sampleIdx[row] = (sampleIdx[row]+1) % bank.length;
+      var nm = bank[sampleIdx[row]].name;
+      var labelEl = document.getElementById("sampleName-"+row);
+      if(labelEl) labelEl.textContent = nm;
+      ensureAudio();
+      if(actx) {
+        if (row === "melody") { // audition with a quick C–E–G–C arp so the new instrument shows off
+          var arp = [261.63, 329.63, 392.00, 523.25], t0 = actx.currentTime;
+          arp.forEach(function(fr, k){ playMelody(fr, t0 + k * 0.11); });
+        } else playSound(row, actx.currentTime, 1);
+      }
+      statusEl.innerHTML = "<b>"+LABELS[row]+" sample "+(sampleIdx[row]+1)+" of "+bank.length+" → "+nm+"</b>. That's what you'll hear in the loop now — tap Change Sample again to keep cycling through all nine.";
+    });
+  });
+
+  document.getElementById("clearBtn").addEventListener("click", function(){
+    closePicker();
+    ROWS.forEach(function(row){
+      for (var s2 = 0; s2 < 16; s2++) {
+        pattern[row][s2] = 0;
+        cells[row][s2].classList.remove("on");
+        if (row === "melody") syncMelodyCell(s2);
+      }
+    });
+    paintPiano();
+    statusEl.innerHTML = "Grid cleared. Press <b>Play</b> and perform a whole beat in from the pads or keys — that's the invention.";
+  });
+
+  /* ---------- Live performance: pads + keys ---------- */
+  function perform(row){
+    ensureAudio();
+    if (actx) playSound(row, actx.currentTime, 1);
+    flashPad(row);
+    if (playing) {
+      // quantize: write into the step the loop is currently on
+      var step = (currentStep + 15) % 16;
+      pattern[row][step] = 1;
+      cells[row][step].classList.add("on");
+      statusEl.innerHTML = "<b>" + LABELS[row] + "</b> performed live → quantized to step " + (step + 1) + " and written into the loop.";
+    }
+  }
+  function blinkEye(){
+    var lid = document.getElementById("lid");
+    var iris = document.getElementById("iris");
+    if (!lid || !iris) return;
+    lid.setAttribute("opacity", "1");
+    iris.setAttribute("opacity", "0.15");
+    setTimeout(function(){ lid.setAttribute("opacity", "0"); iris.setAttribute("opacity", "1"); }, 140);
+  }
+  function bindPad(id, row){
+    var pad = document.getElementById(id);
+    pad.addEventListener("pointerdown", function(e){ e.preventDefault(); perform(row); });
+    pad.addEventListener("keydown", function(e){
+      if (e.target && e.target.tagName === "BUTTON") return; // inner toggle buttons handle themselves
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); perform(row); }
+    });
+  }
+  bindPad("padBlink", "clap");
+  bindPad("padKick", "kick");
+
+  /* Clap trigger choice: blink via webcam, or Terrence's mic — say "clap" */
+  var clapMode = "blink";
+  function setClapMode(mode){
+    clapMode = mode;
+    document.getElementById("trigBlink").classList.toggle("active", mode === "blink");
+    document.getElementById("trigMic").classList.toggle("active", mode === "mic");
+    document.getElementById("clapEyeIcon").style.display = mode === "blink" ? "" : "none";
+    document.getElementById("clapMicIcon").style.display = mode === "mic" ? "" : "none";
+    document.getElementById("clapPadName").textContent = mode === "blink" ? "BLINK" : "SAY “CLAP”";
+    document.getElementById("clapPadSub").textContent = mode === "blink" ? "eyes → clap" : "voice → clap · Terrence's trigger";
+    statusEl.innerHTML = mode === "blink"
+      ? "Clap trigger: <b>blink</b> — the webcam watches your eyes."
+      : "Clap trigger: <b>say “clap”</b> into the mic — Terrence's trigger. In this demo the pad (or B) is your voice.";
+  }
+  ["trigBlink", "trigMic"].forEach(function(id){
+    var tb = document.getElementById(id);
+    tb.addEventListener("pointerdown", function(e){ e.stopPropagation(); });
+    tb.addEventListener("click", function(e){ e.stopPropagation(); setClapMode(id === "trigBlink" ? "blink" : "mic"); });
+  });
+
+  /* Piano pad: ONE press fires the hat roll once, at the preset step */
+  var pianoPad = document.getElementById("padPiano");
+  pianoPad.addEventListener("pointerdown", function(e){
+    e.preventDefault();
+    var f = e.target && e.target.getAttribute ? e.target.getAttribute("data-freq") : null;
+    fireRoll(f ? parseFloat(f) : 261.63);
+  });
+  pianoPad.addEventListener("keydown", function(e){
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); fireRoll(261.63); }
+  });
+
+  /* ---------- Melody piano roll: number row = low octave, Tab-to-backslash row = high octave, PageUp = octave jump ---------- */
+  var NOTE_NAMES = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+  var BLACK_IDX = {1:1, 3:1, 6:1, 8:1, 10:1};
+  var MELODY_ROWS = [
+    {label:"NUMBER ROW · LOW", base:130.81, octave:3, start:0, codes:["Digit1","Digit2","Digit3","Digit4","Digit5","Digit6","Digit7","Digit8","Digit9","Digit0","Minus","Equal"], chars:["1","2","3","4","5","6","7","8","9","0","-","="]},
+    {label:"TAB → \\ ROW · HIGH", base:261.63, octave:4, start:-1, codes:["Tab","KeyQ","KeyW","KeyE","KeyR","KeyT","KeyY","KeyU","KeyI","KeyO","KeyP","BracketLeft","BracketRight","Backslash"], chars:["Tab","Q","W","E","R","T","Y","U","I","O","P","[","]","\\"]}
+  ];
+  var octaveShift = 0; // PageUp throws the whole melody up an octave (cycles +0 → +1 → +2 → +0); PageDown steps back down
+  var melodyByCode = {}; // e.code -> entry {base, octave, semi, char, el, knoteEl}
+  function entryFreq(en){ return en.base * Math.pow(2, en.semi / 12) * Math.pow(2, octaveShift); }
+  function entryName(en){
+    var idx = ((en.semi % 12) + 12) % 12;
+    return NOTE_NAMES[idx] + (en.octave + Math.floor(en.semi / 12) + octaveShift);
+  }
+  function entryBlack(en){ var idx = ((en.semi % 12) + 12) % 12; return !!BLACK_IDX[idx]; }
+  function setOctaveShift(next){
+    octaveShift = next;
+    Object.keys(melodyByCode).forEach(function(code){
+      var en = melodyByCode[code];
+      if (en.knoteEl) en.knoteEl.textContent = entryName(en);
+      if (en.el) en.el.setAttribute("aria-label", "Melody note " + entryName(en) + ", keyboard key " + en.char);
+    });
+    statusEl.innerHTML = octaveShift === 0
+      ? "<b>Octave home.</b> The whole melody roll is back at its home octaves — Tab's B under the C, backslash on the top C."
+      : "<b>Octave +" + octaveShift + ".</b> PageUp threw the whole melody roll up — every key on both rows now plays " + octaveShift + " octave" + (octaveShift > 1 ? "s" : "") + " higher, Tab's B and the backslash's top C included. PageUp once more " + (octaveShift === 2 ? "wraps back home" : "climbs higher") + "; PageDown steps back down.";
+  }
+  var melodyRollEl = document.getElementById("melodyRoll");
+  function performMelody(entry){
+    var freq = entryFreq(entry), noteName = entryName(entry), el = entry.el;
+    ensureAudio();
+    if (actx) playMelody(freq, actx.currentTime);
+    if (el) { el.classList.add("lit"); setTimeout(function(){ el.classList.remove("lit"); }, 260); }
+    var pad = document.getElementById("padMelody");
+    if (pad) { pad.classList.add("flash"); setTimeout(function(){ pad.classList.remove("flash"); }, 150); }
+    var lab = document.getElementById("label-melody");
+    if (lab) { lab.classList.add("hot"); setTimeout(function(){ lab.classList.remove("hot"); }, 200); }
+    if (playing) {
+      var step = (currentStep + 15) % 16;
+      pattern.melody[step] = freq;
+      syncMelodyCell(step);
+      statusEl.innerHTML = "<b>Melody: " + noteName + "</b> (" + MELODY_BANKS[sampleIdx.melody].name + ") → quantized to step " + (step + 1) + " of the MELODY row and written into the loop.";
+    } else {
+      statusEl.innerHTML = "<b>Melody: " + noteName + "</b> — " + MELODY_BANKS[sampleIdx.melody].name + ". Hit Play and your notes also write into the MELODY row of the grid.";
+    }
+  }
+  if (melodyRollEl) {
+    MELODY_ROWS.forEach(function(rowDef){
+      var rowEl = document.createElement("div"); rowEl.className = "mrow";
+      var labEl = document.createElement("div"); labEl.className = "mrow-label"; labEl.textContent = rowDef.label; rowEl.appendChild(labEl);
+      rowDef.codes.forEach(function(code, n){
+        var entry = {base: rowDef.base, octave: rowDef.octave, semi: rowDef.start + n, char: rowDef.chars[n], el: null, knoteEl: null};
+        var k = document.createElement("button"); k.type = "button";
+        k.className = "mkey " + (entryBlack(entry) ? "black" : "white");
+        k.innerHTML = '<span class="kchar"' + (entry.char.length > 1 ? ' style="font-size:10.5px; letter-spacing:.06em"' : "") + '>' + entry.char + '</span><span class="knote">' + entryName(entry) + '</span>';
+        k.setAttribute("aria-label", "Melody note " + entryName(entry) + ", keyboard key " + entry.char);
+        entry.el = k; entry.knoteEl = k.querySelector(".knote");
+        (function(entry){
+          k.addEventListener("pointerdown", function(e){ e.preventDefault(); performMelody(entry); });
+        })(entry);
+        melodyByCode[code] = entry;
+        rowEl.appendChild(k);
+      });
+      melodyRollEl.appendChild(rowEl);
+    });
+  }
+  var melodyPad = document.getElementById("padMelody");
+  if (melodyPad) {
+    melodyPad.addEventListener("pointerdown", function(e){
+      if (e.target && e.target.closest && e.target.closest(".change-sample")) return;
+      e.preventDefault(); performMelody(melodyByCode["KeyQ"]);
+    });
+  }
+
+  document.addEventListener("keydown", function(e){
+    if (e.repeat) return;
+    var tag = (e.target && e.target.tagName) || "";
+    if (tag === "INPUT" || tag === "TEXTAREA") return;
+    if (e.code === "PageUp") { e.preventDefault(); setOctaveShift((octaveShift + 1) % 3); }
+    else if (e.code === "PageDown") { e.preventDefault(); setOctaveShift((octaveShift + 2) % 3); }
+    else if (e.code === "Space") { e.preventDefault(); perform("kick"); }
+    else if (e.code === "KeyB") { perform("clap"); }
+    else if (e.code === "KeyF") { fireRoll(261.63); }
+    else if (melodyByCode[e.code]) { e.preventDefault(); performMelody(melodyByCode[e.code]); }
+  });
+})();
+</script>
+</body>
+</html>
